@@ -1,0 +1,148 @@
+/NOP          
+*IF,ARG1,EQ,0,THEN
+!--- ELastic Buckling analysis
+/SOLU
+    ALLSEL
+    ANTYPE,0
+    PSTRES,ON
+    SOLVE
+    FINISH
+    /SOLU
+    ANTYPE,1
+    BUCOPT,LANB,2,0,0
+    MXPAND,2,0,0,0,0.001
+    SOLVE
+    *GET,P_CR_E,MODE,1,FREQ     ! get frequeny as the magnifier of  the load
+FINISH
+*ENDIF
+
+
+
+*IF,ARG1,EQ,1,THEN
+  
+!--- Elastic buckling analysis
+/SOLU
+    ANTYPE,0
+    PSTRES,ON
+    SOLVE
+FINISH
+/SOLU
+    ANTYPE,1
+    BUCOPT,LANB,2,0,0
+    MXPAND,2,0,0,0,0.001
+    SOLVE
+    *GET,P_CR_E,MODE,1,FREQ
+FINISH
+
+!----Save elastic buckling image
+
+*IF,PIC_LABEL,EQ,1,THEN
+    /POST1  
+    SET,FIRST   
+    PLDISP,0
+    /VIEW,1,1,1,1   
+    /ANG,1  
+    /REP,FAST   
+    /DSCALE,1,200.0 
+    /REPLOT
+    /UI,COPY,SAVE,JPEG,GRAPH,COLOR,REVERSE,LANDSCAPE,NO,100
+    *ENDIF
+FINISH
+            
+            
+            
+!-----update element
+    /PREP7
+    ET,1,SHELL181             
+    MAT,1               
+    MPREAD,FILEin3,,,LIB   ! change to the shell 181 and plastic material
+    
+    !-- elastic for the support
+    MAT,2
+    MPREAD,FILEin2,,,LIB
+     
+    CMSEL,S,LENS
+    ESLA
+    EMODIF,ALL,MAT,2
+    ALLSEL
+    
+   
+!----Use 1.2 elastic buckling load as the final plastic load
+    *SET,FF,P_CR_E*1.2
+
+
+!---- remove original load and move to the otherisde
+
+    *DO,DO_1,0,PARM_LOAD-1,1
+         LOAD,DATA_LOAD(1+DO_1*3,INDEX_LOAD),DATA_LOAD(2+DO_1*3,INDEX_LOAD), 0
+    *ENDDO
+ 
+ 
+ 
+    *DO,DO_1,0,PARM_LOAD-1,1
+        NEW_LOC=DATA_LOAD(2+DO_1*3,INDEX_LOAD)
+
+        *IF,DATA_LOAD(2+DO_1*3,INDEX_LOAD),EQ,0,THEN
+            NEW_LOC=-SS
+        *ENDIF
+             
+        *IF,DATA_LOAD(2+DO_1*3,INDEX_LOAD),EQ,1,THEN
+            NEW_LOC=1+SS
+        *ENDIF
+
+        LOAD,DATA_LOAD(1+DO_1*3,INDEX_LOAD),NEW_LOC, FF*DATA_LOAD(3+DO_1*3,INDEX_LOAD)
+     *ENDDO
+
+    
+    /PREP7
+    ALLSEL
+    *SET,INITIAL_D,HW/INITIAL_D_FLAG       !定义初始缺陷的大小
+    UPGEOM,INITIAL_D,1,1,'file','rst'   更新形状，实现屈曲的激发   
+    FINISH  
+  
+  
+   !-------- Elastic-plastic buckling analysis
+   !-- using arc length
+
+    *IF,SOLVE_LABEL,EQ,0,THEN
+        /SOLU
+        
+        *IF,INIS_FLAG,EQ,1,THEN   ! add initial stress if required
+            CMSEL,S,STEEL
+            ESLA   
+            
+            ISFILE,READ,FILE_INIS,ist,,1
+            ISFILE,LIST
+            
+            ISWRITE,ON
+            ESEL,ALL
+        *ENDIF 
+        
+        ANTYPE,0
+        NLGEOM,1
+        NSUBST,100,0,0 
+        OUTRES,ALL,ALL  
+        ARCLEN,ON,25,1/1000
+        ARCTRM,L
+        AUTOTS,-1.0 
+        
+        /STATUS,SOLU
+        SOLVE   
+        FINISH
+    *ENDIF
+
+    !--- Norton sover
+    *IF,SOLVE_LABEL,EQ,1,THEN
+         /SOLU
+         ANTYPE,0
+         NLGEOM,1
+         NSUBST,30,0,0 
+         OUTRES,ALL,ALL  
+         AUTOTS,1.0 
+         /STATUS,SOLU
+         SOLVE   
+         FINISH
+    *ENDIF
+ 
+ *ENDIF
+ /GOP            

@@ -1,0 +1,38 @@
+! modal analysis, elastic, no damping
+
+NMODE  = arg1      ! number of modal shapes
+FREQB  = arg2      ! start freqnecy
+FREQE  = arg3      ! end frequency
+Nrmkey = arg4      ! normal lize to? OFF: mass matrix ON: unity
+LUMPMASSKEY = arg5 ! if use lump mass in element? OFF-not use, ON-use lumped
+PSTRESKEY = arg6   ! if consider prestress? ON-consider, OFF-not consider
+NTOT = arg7        ! total number of nodal DOF
+NRMDF = arg8       ! include all DOF? 0-all, 1-only translational
+
+
+FINISH
+/SOLU 
+ANTYPE, MODAL      ! static analysis 2
+NLGEOM£¬0            ! small displacement
+TIME, 1              ! total number as 1
+
+
+MODOPT,LANB, NMODE, FREQB, FREQE,, Nrmkey,
+LUMPM, LUMPMASSKEY
+PSTRES,PSTRESKEY
+TOTAL, NTOT, NRMDF
+
+! specify the results save to database
+OUTRES,ERASE
+OUTRES,NSOL,ALL   !
+OUTRES,ESOL,ALL   !
+
+! specify the results print on screen
+OUTRES,ERASE
+OUTRES,NSOL,ALL   !
+OUTRES,ESOL,ALL   !
+
+! select solver, sparse direct is the default 
+EQSLV, SPARSE,,2.5,, DELE
+SOLVE
+FINISH

@@ -1,0 +1,71 @@
+ !============================= 上翼缘的弹簧约束=============
+ ![version1.0]  只适用于梁长划分
+ *IF,ARG1,EQ,20,THEN  
+ /NOP
+FINISH
+/PREP7
+ !====================================== 一侧弹性约束===========     
+UF_ROT_K=ARG2*18864.47*TW*TW*TW/(MESH_L+1)
+/PREP7
+ET,5,combin39,,,6
+R,5,0,0,0.1,UF_ROT_K
+
+TYPE,5
+REAL,5
+*IF,ANA_FLAG,EQ,1,THEN
+N,20000,0,hw,0
+NGEN,MESH_L-1,1,20000,,,,,-L/MESH_L
+E,580,20000
+E,581,20000+MESH_L-1
+            *DO,IND,1,L/T_S-1,1
+             E,581+IND,20000+IND
+           *ENDDO
+ *ENDIF     
+ 
+*IF,ANA_FLAG,EQ,0,THEN
+N,20000,0,hw,0
+NGEN,MESH_L+1,1,20000,,,,,-L/MESH_L
+NSEL,S,NODE,,19999,20051
+D,ALL,ALL
+NSEL,ALL
+E,563,20000
+E,568,20000+MESH_L
+            *DO,IND,1,L/T_S-1,1
+             E,569+IND-1,20000+IND
+           *ENDDO
+ *ENDIF      
+ !======下翼缘的y向位移约束和中点的x向约束及一边的z向约束           
+           NSEL,S,LOC,Z,0,-L
+           NSEL,R,LOC,y,HW
+           NSEL,R,LOC,X,0
+           D,ALL,UX
+           ALLSEL
+           !-------"z=0"---------
+           NSEL,S,LOC,Z,0
+           NSEL,R,LOC,Y,0
+           D,ALL,UY,0
+           
+           NSEL,S,LOC,Z,0
+           NSEL,R,LOC,Y,0
+           NSEL,R,LOC,X,0
+           D,ALL,UZ
+          
+           NSEL,S,LOC,Z,0
+           NSEL,R,LOC,Y,0
+           NSEL,R,LOC,X,0
+           D,ALL,UX
+ 
+          !-------"z=L"---------
+           NSEL,S,LOC,Z,-L
+           NSEL,R,LOC,Y,0
+           D,ALL,UY,0   
+           
+          
+           NSEL,S,LOC,Z,-L
+           NSEL,R,LOC,Y,0
+           NSEL,R,LOC,X,0
+           D,ALL,UX
+ 
+*ENDIF 
+  
+/GOP   

@@ -1,0 +1,12 @@
+/NOP
+FINISH
+/PREP7
+
+*IF,STIFF_FLAG,EQ,1,THEN
+    NSEL,S,LOC,Z,ARG1*(-L)
+    NSEL,R,LOC,X,0
+    NSEL,U,LOC,Y,HW
+    CP,NEXT,UX,ALL           ! use CP to simulate the existance of the stiffners
+    ALLSEL
+ *ENDIF
+/GOP

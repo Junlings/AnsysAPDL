@@ -1,0 +1,38 @@
+NMODE = arg1
+SHIFT = arg2
+LDMULTE =arg3
+
+
+! This is the common setup for the elastic eigen value analysis
+FINISH
+
+! Do the static analysis first
+/SOLU 
+ANTYPE, STATIC       ! static analysis
+NLGEOM£¬ON            ! small displacement
+PSTRES, ON
+TIME, 1              ! total number as 1
+
+! specify the results save to database
+OUTRES,ERASE
+OUTRES,NSOL,ALL   !
+OUTRES,ESOL,ALL   !
+
+! specify the results print on screen
+OUTRES,ERASE
+OUTRES,NSOL,ALL   !
+OUTRES,ESOL,ALL   !
+
+! select solver, sparse direct is the default 
+EQSLV, SPARSE,,2.5,, DELE
+SOLVE
+FINISH
+
+! setup the buckling analysis
+/SOLU 
+ANTYPE,BUCKLE
+BUCOPT,, NMODE, SHIFT, LDMULTE
+OUTPR,NSOL,ALL
+SAVE                  ! save a backup database
+SOLVE
+FINISH

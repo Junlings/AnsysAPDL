@@ -1,0 +1,20 @@
+FINISH
+/SOLU 
+ANTYPE, STATIC       ! static analysis
+NLGEOM£¬0            ! small displacement
+TIME, 1              ! total number as 1
+
+! specify the results save to database
+OUTRES,ERASE
+OUTRES,NSOL,ALL   !
+OUTRES,ESOL,ALL   !
+
+! specify the results print on screen
+OUTRES,ERASE
+OUTRES,NSOL,ALL   !
+OUTRES,ESOL,ALL   !
+
+! select solver, sparse direct is the default 
+EQSLV, SPARSE,,2.5,, DELE
+SOLVE
+FINISH

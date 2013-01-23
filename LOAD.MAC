@@ -1,0 +1,56 @@
+/NOP
+
+!====arg1: type of load      1 on top flnage Fz,2 bottom flange Fz,3 web Fy,4 no top flange center
+!====arg2: location of load
+!====arg3: mangitude of load
+
+FINISH
+/PREP7
+
+!=============Get total node number count=========
+NSEL,S,LOC,Z,-L
+NSEL,R,LOC,Y,HW
+*GET,NODE_NUM_UF,NODE,0,COUNT
+ 
+
+NSEL,S,LOC,Z,-L
+NSEL,R,LOC,Y,0
+*GET,NODE_NUM_DF,NODE,0,COUNT
+
+NSEL,S,LOC,Z,-L
+NSEL,R,LOC,X,0
+*GET,NODE_NUM_W,NODE,0,COUNT
+
+*IF,ARG1,EQ,1,THEN
+    NSEL,S,LOC,Z,ARG2*(-L)
+    NSEL,R,LOC,Y,HW
+    F,ALL,FZ,ARG3/NODE_NUM_UF
+*ENDIF
+
+*IF,ARG1,EQ,2,THEN
+    NSEL,S,LOC,Z,ARG2*(-L)
+    NSEL,R,LOC,Y,0
+    F,ALL,FZ,ARG3/NODE_NUM_DF
+*ENDIF
+
+*IF,ARG1,EQ,3,THEN
+    NSEL,S,LOC,Z,ARG2*(-L)
+    NSEL,R,LOC,X,0
+    F,ALL,FZ,ARG3/NODE_NUM_W
+*ENDIF
+
+*IF,ARG1,EQ,4,THEN	
+    NSEL,ALL
+    NSEL,R,LOC,Y,HW
+    NSEL,R,LOC,X,0
+    NSEL,R,LOC,Z,-L,0    
+    *GET,NODE_NUM_WU,NODE,0,COUNT    
+    F,ALL,Fy,-ARG3/NODE_NUM_WU
+*ENDIF
+
+
+
+ALLSEL
+FINISH
+
+/GOP

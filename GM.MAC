@@ -1,0 +1,177 @@
+/NOP
+BFB=arg1
+TFT=arg2
+HW=arg3
+TW=arg4
+L=arg5
+LOOP_LABEL=arg6
+B_S=arg1/arg7
+T_S=arg5/arg8
+TW_S=arg3/arg9
+
+
+BFT=BFB
+TFB=TFT
+
+*IF,ANA_FLAG,EQ,0,THEN
+SS=0
+*ENDIF
+
+*IF,ANA_FLAG,EQ,1,THEN
+SS=1/24
+*ENDIF
+
+FINISH
+!------------------------Geometric Modeling--------------------------
+!------------------Key point on the cross section--------------------
+    /PREP7
+    K,1,-BFB/2,0,SS*L
+    K,2,0,0,SS*L
+    K,3,BFB/2,0,SS*L
+    K,4,-BFT/2,HW,SS*L
+    K,5,0,HW,SS*L
+    K,6,BFT/2,HW,SS*L
+    K,17,0,0,-L-SS*L
+     
+!------------------lines on the cross section and length direction------------
+    LSTR,1,2
+    LSTR,2,3
+    LSTR,4,5
+    LSTR,5,6
+    LSTR,2,5
+    LSTR,2,17
+
+!------------------drag area from lines and guide line------
+    ADRAG,1,2,,,,,6
+    ADRAG,3,4,,,,,6
+    ADRAG,5,,,,,,6 
+      
+!----------------- if doing a nonlinear analysis, then use working plane to cut the beam at support 
+!----------------- to make sure the support do not fail
+*IF,ANA_FLAG,EQ,1,THEN
+    ALLSEL
+    WPAVE,0,0,0
+    LSBW,ALL
+    ASBW,ALL
+    
+    WPAVE,0,0,-L
+    LSBW,ALL
+    ASBW,ALL
+    WPAVE,0,0,0    
+*ENDIF  
+    
+!--------------Glue Area together---------
+ASEL,ALL
+AGLUE,ALL
+ASEL,ALL
+VSEL,ALL
+FINISH
+      
+!------------- Define components
+
+ASEL,S,LOC,Z,0,-L
+CM,STEEL,AREA
+ALLSEL
+CMSEL,U,STEEL
+CM,LENS,AREA
+ALLSEL
+
+
+!======================Setup material lib path===========
+
+*SET,MYPATH,'J:\ANSYSLIB\mat'    !定义材料库路径
+*SET,FILEin1,'steel-elastic'             !定义弹性钢材
+*SET,FILEin2,'STEEL-G'                   !定义                                                         
+*SET,FILEin3,'steel-elastic&plastic'     !定义塑性钢材      
+      
+ !----------------read material out from the matlib
+/prep7
+/MPLIB,READ,MYPATH
+/UNITS,SI
+MAT,1               
+MPREAD,FILEin1,,,LIB   ! elastic steel
+MAT,2               
+MPREAD,FILEin1,,,LIB   ! bilinear plastic steel
+           
+ !-----------------Define element type-----------------
+
+ET,1,shell63   ! steel use shell63
+R,1,TFT
+R,2,TFB
+R,3,TW
+
+!-----------------Attach property to the area--------------
+!---Bottom flange---
+ASEL,S,LOC,y,0
+AATT,1,2,1,0
+
+!---Top flange---        
+ASEL,S,LOC,y,HW
+AATT,1,1,1,0  
+    
+!---web---        
+ASEL,S,LOC,X,0
+AATT,1,3,1,0  
+ASEL,ALL
+
+
+!-------------L-LENGTH---------- 
+LSEL,S,LENGTH,,L
+LESIZE,all,T_S       
+
+!-------------TOP FLANGE-------
+LSEL,S,LOC,Z,0
+LSEL,R,LOC,Y,HW
+LESIZE,all,B_S
+!LPLOT,ALL
+
+
+!-------------BOTTOM FLANGE-------
+LSEL,S,LOC,Z,0
+LSEL,R,LOC,Y,0
+LESIZE,all,B_S
+!LPLOT,ALL         
+
+!---------------WEB----------
+LSEL,S,LOC,Z,0
+LSEL,R,LOC,X,0
+LESIZE,all,TW_S
+
+LSEL,S,LOC,Z,-L
+LSEL,R,LENGTH,,HW
+LSEL,U,LOC,X,0
+LESIZE,all,TW_S          
+
+!-----------------legout---------
+
+CMSEL,S,LENS
+LSLA
+LSEL,R,LENGTH,,SS*L
+LESIZE,all,SS*L/3
+
+!--------------Mesh the area--------
+MSHKEY,1
+ASEL,ALL
+AMESH,ALL
+ASEL,ALL
+VSEL,ALL
+FINISH
+
+
+!------compress node numbers－－－－
+/PREP7
+ALLSEL,ALL
+NUMMRG,NODE
+NUMCMP,NODE
+NUMCMP,AREA
+NUMCMP,LINE
+
+!------------define the flange line component
+NSEL,S,LOC,X,0
+NSEL,R,LOC,Y,0
+CM,LINE_FLAG,NODE
+
+
+FINISH
+
+/GOP

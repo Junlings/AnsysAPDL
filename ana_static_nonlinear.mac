@@ -1,0 +1,43 @@
+FINISH
+/SOLU 
+
+TOTALTIME = arg1
+MAXTOTALSTEPS = arg2
+MAX_ITER = arg3
+ARCLENGTH = arg4
+
+ANTYPE, STATIC       ! static analysis
+NLGEOM£¬1            ! large displacement
+TIME, TOTALTIME      ! total number as 1
+NSUBST,MAXTOTALSTEPS,0,0   ! specify max
+
+
+
+! select solver, sparse direct is the default 
+EQSLV, SPARSE,,2.5,, DELE
+!AUTOTS,OFF
+NEQIT, MAX_ITER,
+!CNVTOL, F,, 0.005, 2, 1.0
+!CNVTOL, M,, 0.005, 2, 1.0
+!SOLCONTROL, 1, 0,,
+
+
+! specify the results save to database
+OUTRES,ERASE
+OUTRES,NSOL,ALL   !
+OUTRES,ESOL,ALL   !
+
+! specify the results print on screen
+OUTRES,ERASE
+OUTRES,NSOL,ALL   !
+OUTRES,ESOL,ALL   !
+
+! check if use arclength method
+*IF,ARCLENGTHL,EQ,1,THEN
+        ARCLEN,ON,25,1/1000    ! max and min arc multiplier
+        ARCTRM,L               ! Terminates the analysis if the first limit point has been reached
+        AUTOTS,OFF
+*ENDIF
+
+SOLVE
+FINISH

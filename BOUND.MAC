@@ -1,0 +1,250 @@
+/NOP
+FINISH
+/PREP7
+
+
+!---------------------Common Bounraries
+!----Full restraints at the top flanges to simulate the top concrete layer
+CMSEL,S,STEEL
+NSLA
+NSEL,R,LOC,y,HW   
+*DO,IND,1,L/T_S+1,1
+    NSEL,S,LOC,Y,HW
+    NSEL,R,LOC,Z,0-T_S*(IND-1)
+    CP,NEXT,UY,ALL        
+*ENDDO
+ALLSEL
+
+!---- restrains of DY of the bottom flange and X at center, and all DZ
+NSEL,S,LOC,Z,0,-L
+NSEL,R,LOC,y,HW
+NSEL,R,LOC,X,0
+D,ALL,UX
+ALLSEL
+!-------"z=0"---------
+NSEL,S,LOC,Z,0
+NSEL,R,LOC,Y,0
+D,ALL,UY,0
+
+NSEL,S,LOC,Z,0
+NSEL,R,LOC,Y,0
+NSEL,R,LOC,X,0
+D,ALL,UZ
+
+NSEL,S,LOC,Z,0
+NSEL,R,LOC,Y,0
+NSEL,R,LOC,X,0
+D,ALL,UX
+
+!-------"z=L"---------
+NSEL,S,LOC,Z,-L
+NSEL,R,LOC,Y,0
+D,ALL,UY,0   
+
+
+NSEL,S,LOC,Z,-L
+NSEL,R,LOC,Y,0
+NSEL,R,LOC,X,0
+D,ALL,UX
+
+
+
+!--------- Restrains on the web
+
+*IF,ARG1,EQ,2,THEN           
+
+    NSEL,S,LOC,Z,-L
+    NSEL,R,LOC,X,0
+    NSEL,U,LOC,Y,0     
+    NSEL,U,LOC,Y,HW                 
+    D,ALL,ALL
+    
+    NSEL,S,LOC,Z,0
+    NSEL,R,LOC,X,0
+    NSEL,U,LOC,Y,0     
+    NSEL,U,LOC,Y,HW   
+    D,ALL,ALL
+*ENDIF
+
+
+!-------- Restrains on the support
+*IF,ARG1,EQ,3,THEN                   
+
+*ENDIF   
+
+        
+!-------- Bottom flange one side sway restraint
+*IF,ARG1,EQ,5,THEN
+    NSEL,S,LOC,Z,0
+    NSEL,R,LOC,Y,0
+    NSEL,U,LOC,X,0      
+    !CP,NEXT,UZ,ALL              
+    
+    NSEL,S,LOC,Z,-L
+    NSEL,R,LOC,Y,0
+    NSEL,U,LOC,X,0           
+    CP,NEXT,UZ,ALL              
+*ENDIF  
+        
+!-------- Bottom flange both side sway restraint
+*IF,ARG1,EQ,6,THEN
+    NSEL,S,LOC,Z,0
+    NSEL,R,LOC,Y,0
+    NSEL,U,LOC,X,0      
+    CP,NEXT,UZ,ALL              
+    
+    NSEL,S,LOC,Z,-L
+    NSEL,R,LOC,Y,0
+    NSEL,U,LOC,X,0           
+    CP,NEXT,UZ,ALL              
+*ENDIF 
+
+!-------- Bottom flage one side elastic spring restraint, limited section support
+*IF,ARG1,EQ,10,THEN 
+    COMBI_K=ARG2
+    ET,5,combin39,,,3
+    R,5,0,0,0.1,COMBI_K*12
+    R,6,0,0,0.1,COMBI_K*15
+    R,7,0,0,0.1,COMBI_K*20
+    R,8,0,0,0.1,COMBI_K*30
+    R,9,0,0,0.1,COMBI_K*60
+    
+    N,20000,BFT/2,0,-L
+    N,20001,-BFT/2,0,-L
+    N,20002,-BFT/2*0.8,0,-L
+    N,20003,BFT/2*0.8,0,-L
+    N,20004,-BFT/2*0.6,0,-L
+    N,20005,BFT/2*0.6,0,-L
+    N,20006,-BFT/2*0.4,0,-L
+    N,20007,BFT/2*0.4,0,-L
+    N,20008,-BFT/2*0.2,0,-L
+    N,20009,BFT/2*0.2,0,-L
+    cp,next,UZ,7,20000,20001,20002,20003,20004,20005,20006,20007,20008,20009
+    TYPE,5
+    REAL,5
+    E,312,20000
+    E,57,20001
+    
+    TYPE,5
+    REAL,6
+    E,365,20003
+    E,58,20002
+    
+    TYPE,5
+    REAL,7
+    E,364,20005
+    E,59,20004
+    
+    TYPE,5
+    REAL,8
+    E,363,20007
+    E,60,20006
+    
+    TYPE,5
+    REAL,9
+    E,362,20009
+    E,61,20008
+
+*ENDIF  
+  
+  
+  
+  
+  
+!===================Bottom flange both side spring restraint========== 
+*IF,ARG1,EQ,11,THEN  
+    !====================================== One side===========     
+    COMBI_K1=ARG2
+    COMBI_K2=ARG3
+    ET,5,combin39,,,3
+    R,5,0,0,0.1,COMBI_K1*12
+    R,6,0,0,0.1,COMBI_K1*15
+    R,7,0,0,0.1,COMBI_K1*20
+    R,8,0,0,0.1,COMBI_K1*30
+    R,9,0,0,0.1,COMBI_K1*60
+    
+    R,15,0,0,0.1,COMBI_K2*12
+    R,16,0,0,0.1,COMBI_K2*15
+    R,17,0,0,0.1,COMBI_K2*20
+    R,18,0,0,0.1,COMBI_K2*30
+    R,19,0,0,0.1,COMBI_K2*60
+    
+    
+    
+    N,20000,BFT/2,0,-L
+    N,20001,-BFT/2,0,-L
+    N,20002,-BFT/2*0.8,0,-L
+    N,20003,BFT/2*0.8,0,-L
+    N,20004,-BFT/2*0.6,0,-L
+    N,20005,BFT/2*0.6,0,-L
+    N,20006,-BFT/2*0.4,0,-L
+    N,20007,BFT/2*0.4,0,-L
+    N,20008,-BFT/2*0.2,0,-L
+    N,20009,BFT/2*0.2,0,-L
+    cp,next,UZ,7,20000,20001,20002,20003,20004,20005,20006,20007,20008,20009
+    TYPE,5
+    REAL,5
+    E,312,20000
+    E,57,20001
+    
+    TYPE,5
+    REAL,6
+    E,365,20003
+    E,58,20002
+    
+    TYPE,5
+    REAL,7
+    E,364,20005
+    E,59,20004
+    
+    TYPE,5
+    REAL,8
+    E,363,20007
+    E,60,20006
+    
+    TYPE,5
+    REAL,9
+    E,362,20009
+    E,61,20008
+    
+     !====================================== The other side===========         
+    N,20010,-BFT/2,0,0
+    N,20011,BFT/2,0,0
+    N,20012,-BFT/2*0.8,0,0
+    N,20013,BFT/2*0.8,0,0
+    N,20014,-BFT/2*0.6,0,0
+    N,20015,BFT/2*0.6,0,0
+    N,20016,-BFT/2*0.4,0,0
+    N,20017,BFT/2*0.4,0,0
+    N,20018,-BFT/2*0.2,0,0
+    N,20019,BFT/2*0.2,0,0
+    cp,next,UZ,20010,20011,20012,20013,20014,20015,20016,20017,20018,20019
+    d,20010,uz,0
+    TYPE,5
+    REAL,15
+    E,1,20010
+    E,307,20011
+    
+    TYPE,5
+    REAL,16
+    E,311,20013
+    E,3,20012
+    
+    TYPE,5
+    REAL,17
+    E,310,20015
+    E,4,20014
+    
+    TYPE,5
+    REAL,18
+    E,309,20017
+    E,5,20016
+    
+    TYPE,5
+    REAL,19
+    E,308,20019
+    E,6,20018
+*ENDIF   
+  
+
+/GOP

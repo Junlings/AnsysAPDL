@@ -1,0 +1,18 @@
+ID = arg1
+EX = arg2
+PRXY = arg3
+FY = arg4    ! yielding stress
+EH = arg5    ! hardening slope
+
+/NOP
+MAT,ID
+TBDEL,ALL,_MATL
+MPDEL,ALL,_MATL
+MPTEMP,R5.0, 1, 1,  0.00000000    ,
+MPDATA,R5.0, 1,EX  ,_MATL   , 1,  EX    ,
+MPTEMP,R5.0, 1, 1,  0.00000000    ,
+MPDATA,R5.0, 1,PRXY,_MATL   , 1, PRXY    ,,
+TB,BISO,_MATL   ,   1
+TBTEM,  0.00000000    ,   1
+TBDAT,   1,  FY    , EH,
+/GO

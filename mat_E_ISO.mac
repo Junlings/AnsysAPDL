@@ -1,0 +1,13 @@
+ID = arg1
+EX = arg2
+PRXY = arg3
+
+/NOP
+MAT,ID
+TBDEL,ALL,_MATL
+MPDEL,ALL,_MATL
+MPTEMP,R5.0, 1, 1,  0.00000000    ,
+MPDATA,R5.0, 1,EX  ,_MATL   , 1,  EX    ,
+MPTEMP,R5.0, 1, 1,  0.00000000    ,
+MPDATA,R5.0, 1,PRXY,_MATL   , 1, PRXY    ,
+/GO
